@@ -1,10 +1,10 @@
 resource "aws_subnet" "cars-dev-subnet1" {
   vpc_id = "${aws_vpc.cars-dev-vpc.id}"
-  cidr_block = "${vars.vpc-cidr-subnet1}"
+  cidr_block = "${var.vpc-cidr-subnet1}"
   map_public_ip_on_launch = true
   availability_zone = "us-east-1a"
 
-tags{
+tags={
     environment="dev"
 }
 
@@ -12,11 +12,11 @@ tags{
 
 resource "aws_subnet" "cars-dev-subnet2" {
   vpc_id = "${aws_vpc.cars-dev-vpc.id}"
-  cidr_block = "${vars.vpc-cidr-subnet2}"
+  cidr_block = "${var.vpc-cidr-subnet2}"
   map_public_ip_on_launch = true
   availability_zone = "us-east-1b"
 
-tags{
+tags={
     environment="dev"
 }
 
@@ -24,11 +24,11 @@ tags{
 
 resource "aws_subnet" "cars-dev-subnet3" {
   vpc_id = "${aws_vpc.cars-dev-vpc.id}"
-  cidr_block = "${vars.vpc-cidr-subnet3}"
+  cidr_block = "${var.vpc-cidr-subnet3}"
   map_public_ip_on_launch = true
   availability_zone = "us-east-1c"
 
-tags{
+tags={
     environment="dev"
 }
 
