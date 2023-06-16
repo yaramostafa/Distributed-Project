@@ -1,6 +1,7 @@
-provider "aws" {
-  region = "us-east-1"
-  access_key = AKIA3ZD2WG2PC4DORPNW
-  secret_key = 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
-  version="v2.70.0"
+resource "aws_vpc" "cars-dev-vpc" {
+    cidr_block = "${var.vpc_cidr}"
+    instance_tenancy = "default"
+  tags = {
+    "environment" = "dev"
+  }
 }
