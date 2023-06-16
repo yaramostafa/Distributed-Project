@@ -18,11 +18,10 @@ class Game:
 
 class Player:
     def __init__(self,Player_name,Player_num):
-
         self.filepath = '.\\img\\car'+str(Player_num)+'.png'
+        self.car_width = 49
         self.car_x_coordinate = (1300 * (0.1+0.2*(Player_num-1)))
         self.car_y_coordinate = (600 * 0.8)
-        self.car_width = 49
         self.Player_name = Player_name
         self.Player_num = Player_num
         self.disconnect = 0
@@ -32,10 +31,10 @@ class Player:
     def create_game(self,number_of_players,name):
         g = Game(number_of_players,name)
         g.players.append(self.name)
-        #Create Game in DB
-        self.game = g
+        self.game = g.name
 
     def get_game(self):
+        
         return self.game
 
 

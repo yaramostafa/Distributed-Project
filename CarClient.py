@@ -5,23 +5,32 @@ import pickle
 import socket, threading
 from cargame import *
 
+HOST = 'localhost'
+PORT = 10000
+MSGSIZE = 2048
+
+
 class ClientSocket:
     def __init__(self):
-        host = 'localhost'
-        port = 10000
-        self.size = 2048
         self.csocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.csocket.connect((host, port))
-        number_of_player = int(input("Enter Number of Players: "))
-        print(number_of_player)
-        self.csocket.send(pickle.dumps(number_of_player))
-        self.player = pickle.loads(self.csocket.recv(self.size))
-        print(pickle.loads(self.csocket.recv(self.size)))
+        self.csocket.connect((HOST, PORT))
+        #login/signup
+        
+        chooseLogin = int(input('Choose 1 to login or 2 to signup:'))
+        while True:
+            if not (chooseLogin == 1 or chooseLogin ==2):
+                chooseLogin = int(input('Please enter a correct choice: '))
+            else: break
+        print(chooseLogin)
+        self.csocket.send(pickle.dumps(chooseLogin))
+        
+        self.player = pickle.loads(self.csocket.recv(MSGSIZE))
+        print(pickle.loads(self.csocket.recv(MSGSIZE)))
 
     def send(self, data):
         try:
             self.csocket.send(pickle.dumps(data))
-            return pickle.loads(self.csocket.recv(self.size))
+            return pickle.loads(self.csocket.recv(MSGSIZE))
         except:
             pass
     def closeconn(self):
@@ -29,7 +38,7 @@ class ClientSocket:
         self.csocket.send(pickle.dumps(0))
 
     def recieve(self):
-        return pickle.loads(self.csocket.recv(self.size))
+        return pickle.loads(self.csocket.recv(MSGSIZE))
 
 
 class CarRacing:
