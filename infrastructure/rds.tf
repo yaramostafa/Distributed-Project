@@ -10,5 +10,11 @@
   vpc_security_group_ids = ["${aws_security_group.cars-dev-securitygroup2.id}"]
   skip_final_snapshot  = true
   publicly_accessible =  true
-}
+
+  provisioner "local-exec" {
+    command = "mysql --host=${self.address} --port=${self.port} --user=${self.username} --password=${self.password} mydb < ./demo.sql"
+    }
+  }
+
+  
 
