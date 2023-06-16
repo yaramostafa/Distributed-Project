@@ -10,23 +10,18 @@ HOST = 'localhost'
 
 class ClientThread(threading.Thread):
     
-    games = []
-
+    
     def __init__(self, clientsocket):
         threading.Thread.__init__(self)
-        
         self.csocket = clientsocket
-        # self.number_of_players = pickle.loads(self.csocket.recv(2048))
-        #self.player = pickle.loads(self.csocket.recv(MSGSIZE))
-        #print logchoice
         
         logchoose = pickle.loads(self.csocket.recv(MSGSIZE))
         print(logchoose)
         if(logchoose==1):
-            account = DB.loginToGame()
+            self.player = DB.loginToGame()
         elif(logchoose==2):
-            account = DB.signup()
-            
+            self.player = DB.signup()
+        
         # print(self.number_of_players)
         
         # Check if game exists
@@ -40,7 +35,6 @@ class ClientThread(threading.Thread):
         #     self.game = Game(self.number_of_players)
         #     ClientThread.games.append(self.game)
         
-        self.player = self.game.create_player()
 
         print("[+] New thread started")
 
@@ -49,21 +43,18 @@ class ClientThread(threading.Thread):
         self.csocket.send(pickle.dumps(self.player))
 
         self.csocket.send(pickle.dumps("Welcome to the multi-threaded server"))
-
+        #sending to waiting for players
         while True:
             print("PLAYER_NUM",self.game.player_counter)
             print("NUMBER OF PLAYERS", self.game.number_of_players)
-            if self.game.player_counter < self.game.number_of_players:
-                while self.game.player_counter < self.game.number_of_players:
-                    self.csocket.send(pickle.dumps(self.game.player_counter))
-                    sleep(1)
-            else:
+            while self.game.player_counter < self.game.number_of_players:
+                self.csocket.send(pickle.dumps('asd'))
                 sleep(1)
+            sleep(1)
             self.csocket.send(pickle.dumps("start"))
             self.game.start = 1
             break
 
-        reply = ""
         while True:
             try:
                 data = pickle.loads(self.csocket.recv(2048))

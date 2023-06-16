@@ -18,7 +18,7 @@ def signup():
             username = str(input('Please Re-enter a correct username: '))
             continue
     db.commit()
-    loginToGame()
+    return loginToGame()
     
 def loginToGame():
     user = str(input('Enter your username: '))

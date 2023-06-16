@@ -117,12 +117,12 @@ class CarRacing:
                     pygame.quit()
 
                 if (event.type == pygame.KEYDOWN):
-                    if (event.key == pygame.K_UP):
-                        self.player.car_y_coordinate -= 50
-                        print("CAR Y COORDINATES: %s" % self.player.car_y_coordinate)
-                    if (event.key == pygame.K_DOWN):
-                        self.player.car_y_coordinate += 50
-                        print("CAR Y COORDINATES: %s" % self.player.car_y_coordinate)
+                    # if (event.key == pygame.K_UP):
+                    #     self.player.car_y_coordinate -= 50
+                    #     print("CAR Y COORDINATES: %s" % self.player.car_y_coordinate)
+                    # if (event.key == pygame.K_DOWN):
+                    #     self.player.car_y_coordinate += 50
+                    #     print("CAR Y COORDINATES: %s" % self.player.car_y_coordinate)
                     if (event.key == pygame.K_LEFT):
                         self.player.car_x_coordinate -= 50
                         print("CAR X COORDINATES: %s" % self.player.car_x_coordinate)
@@ -228,9 +228,9 @@ class CarRacing:
     def run_enemy2_car(self, thingx, thingy):
         self.gameDisplay.blit(self.enemy_car2, (thingx, thingy))
 
-    def highscore(self, count):
+    def highscore(self, score):
         font = pygame.font.SysFont("arial", 20)
-        text = font.render("Score : " + str(count), True, self.white)
+        text = font.render("Score : " + str(score), True, self.white)
         self.gameDisplay.blit(text, (0, 0))
 
     def leaderboard(self):
@@ -247,15 +247,17 @@ class CarRacing:
                 disconnected.append(opponent.Player_num-1)
                 dis -= 20
             else:
-                all_scores.append(opponent.count)
+                all_scores.append({oppnum, opponent.count})
 
         all_scores.insert(self.player.Player_num-1,self.player.count)
         all_scores_sorted = all_scores.copy()
 
         all_scores_sorted.sort(reverse=True)
+        
         font = pygame.font.SysFont("arial", 20)
         text = font.render("LEADERBOARD", True, self.white)
         self.gameDisplay.blit(text, (1055, 0))
+        
         i = 20
         for d in disconnected:
             all_scores.insert(d,"d")
