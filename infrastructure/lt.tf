@@ -1,6 +1,6 @@
 resource "aws_launch_configuration" "cars-dev-launchtemplate" {
   name_prefix = "cars-dev-"
-  image_id = "ami-022e1a32d3f742bd8 "
+  image_id = "ami-022e1a32d3f742bd8"
   instance_type = "t2.micro"
   key_name = "cars-dev-key"
 
