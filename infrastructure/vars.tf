@@ -11,3 +11,6 @@ variable "vpc-cidr-subnet2" {
 variable "vpc-cidr-subnet3" {
     default = "10.0.3.0/24"
 }
+variable "all-cidr" {
+  default = "0.0.0.0/0"
+}
