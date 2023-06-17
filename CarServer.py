@@ -17,10 +17,9 @@ class ClientThread(threading.Thread):
         logchoose = pickle.loads(self.csocket.recv(MSGSIZE))
         print(logchoose)
         if(logchoose==2):
-            self.player = DB.loginToGame(self.csocket)
+            self.player = list(DB.loginToGame(self.csocket))
         elif(logchoose==1):
-            self.player = DB.signup(self.csocket)
-        
+            self.player = list(DB.signup(self.csocket))
         print(self.player)
         # print(self.number_of_players)
         
@@ -45,15 +44,16 @@ class ClientThread(threading.Thread):
         
         #sending to waiting for players
         while True:
-            room = DB.getRoom(self.player[2])
+            room = DB.getRoom(self.player[2])[2]
+            countplayers = DB.getCountPlayers(self.player[2])
             print("PLAYER_NUM",self.player[3])
-            print("NUMBER OF PLAYERS", room[2])
-            while self.player[3] < room[2]:
+            print("NUMBER OF PLAYERS", room)
+            while countplayers < room:
+                countplayers = DB.getCountPlayers(self.player[2])
                 self.csocket.send(pickle.dumps(0))
                 sleep(1)
             sleep(1)
             self.csocket.send(pickle.dumps("start"))
-            self.game.start = 1
             break
 
         while True:
@@ -61,14 +61,13 @@ class ClientThread(threading.Thread):
                 data = pickle.loads(self.csocket.recv(2048))
 
                 if not data:
-                    print("Player"+str(self.player.Player_num)+" Disconnected")
+                    print("Player"+str(self.player[3])+" Disconnected")
                     #self.player.disconnect = 1
-                    self.game.players[self.player.Player_num-1].disconnect = 1
+                    self.player[-2] = 1
                     break
                 else:
-                    self.game.players[self.player.Player_num - 1] = data
-                    reply = [self.game.players[i] for i in range(len(self.game.players)) if i !=self.player.Player_num-1]
-
+                    self.player = data
+                    reply = DB.getOpponents(self.player[0])
                     print("Received: ", data)
                     print("Sending : ", reply)
 

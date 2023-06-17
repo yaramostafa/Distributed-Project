@@ -59,8 +59,7 @@ class CarRacing:
         self.client = ClientSocket()
         self.player = self.client.player
         print(self.player)
-        self.player.append('.\\img\\car'+str(self.player[3])+'.png')
-        self.carImg = pygame.image.load(self.player.filepath)
+        self.carImg = pygame.image.load(self.player[-1])
         self.initialize()
 
     def initialize(self):
@@ -103,9 +102,9 @@ class CarRacing:
 
     def drawOpp(self):
         for opponent in self.opponents:
-            if opponent.disconnect == 0:
-                op_carImg = pygame.image.load(opponent.filepath)
-                self.gameDisplay.blit(op_carImg, (opponent.car_x_coordinate, opponent.car_y_coordinate))
+            if opponent[-2] == 0:
+                op_carImg = pygame.image.load(opponent[-1])
+                self.gameDisplay.blit(op_carImg, (opponent[4], opponent[5]))
 
     def racing_window(self):
         self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height))
@@ -122,21 +121,16 @@ class CarRacing:
                     self.crashed = True
                     self.client.closeconn()
                     pygame.quit()
-
+                    
+                
                 if (event.type == pygame.KEYDOWN):
-                    # if (event.key == pygame.K_UP):
-                    #     self.player.car_y_coordinate -= 50
-                    #     print("CAR Y COORDINATES: %s" % self.player.car_y_coordinate)
-                    # if (event.key == pygame.K_DOWN):
-                    #     self.player.car_y_coordinate += 50
-                    #     print("CAR Y COORDINATES: %s" % self.player.car_y_coordinate)
                     if (event.key == pygame.K_LEFT):
-                        self.player.car_x_coordinate -= 50
-                        print("CAR X COORDINATES: %s" % self.player.car_x_coordinate)
+                        self.player[4] -= 50
+                        print("CAR X COORDINATES: %s" % self.player[4])
                     if (event.key == pygame.K_RIGHT):
-                        self.player.car_x_coordinate += 50
-                        print("CAR X COORDINATES: %s" % self.player.car_x_coordinate)
-                    print("x: {x}, y: {y}".format(x=self.player.car_x_coordinate, y=self.player.car_y_coordinate))
+                        self.player[4] += 50
+                        print("CAR X COORDINATES: %s" % self.player[4])
+                    print("x: {x}, y: {y}".format(x=self.player[4], y=self.player[5]))
 
             self.gameDisplay.fill(self.black)
             self.back_ground_road()
@@ -148,7 +142,7 @@ class CarRacing:
 
             if self.enemy_car_starty > self.display_height:
                 self.enemy_car_starty = 0 - self.enemy_car_height
-                self.enemy_car_startx = random.randrange(50, 950)
+                self.enemy_car_sttx = random.randrange(50, 950)
 
             if self.enemy_car2_starty > self.display_height:
                 self.enemy_car2_starty = 0 - self.enemy_car_height
@@ -158,36 +152,36 @@ class CarRacing:
 
             self.opponents = self.client.send(self.player)
             self.drawOpp()
-            self.car(self.player.car_x_coordinate, self.player.car_y_coordinate)
+            self.car(self.player[4], self.player[5])
 
-            self.highscore(self.player.count)
-
+            self.highscore(self.player[6])
             win = self.leaderboard()
             if win != -1:
                 self.display_winner(win)
                 break
-            self.player.count += 1
-            if (self.player.count % 100 == 0):
+            self.player[6] += 1
+            if (self.player[6] % 100 == 0):
                 self.enemy_car_speed += 1
                 self.bg_speed += 1
+                # call db query
                 print("Milestone Reached!")
-            if self.player.car_y_coordinate < self.enemy_car_starty + self.enemy_car_height:
-                if self.player.car_x_coordinate > self.enemy_car_startx and self.player.car_x_coordinate < self.enemy_car_startx + self.enemy_car_width or self.player.car_x_coordinate + self.player.car_width > self.enemy_car_startx and self.player.car_x_coordinate + self.player.car_width < self.enemy_car_startx + self.enemy_car_width:
+            if self.player[5] < self.enemy_car_starty + self.enemy_car_height:
+                if self.player[5] > self.enemy_car_startx and self.player[4] < self.enemy_car_startx + self.enemy_car_width or self.player[4] + 49 > self.enemy_car_startx and self.player[4] + 49 < self.enemy_car_startx + self.enemy_car_width:
                     self.crashed = True
                     #self.display_message("Game Over !!!")
-                    self.player.count-= 100
+                    self.player[6]-= 100
                     self.display_message("Crashed -100")
 
-            if self.player.car_y_coordinate < self.enemy_car2_starty + self.enemy_car2_height:
-                if self.player.car_x_coordinate > self.enemy_car2_startx and self.player.car_x_coordinate < self.enemy_car2_startx + self.enemy_car2_width or self.player.car_x_coordinate + self.player.car_width > self.enemy_car2_startx and self.player.car_x_coordinate + self.player.car_width < self.enemy_car2_startx + self.enemy_car2_width:
+            if self.player[5] < self.enemy_car2_starty + self.enemy_car2_height:
+                if self.player[4] > self.enemy_car2_startx and self.player[4] < self.enemy_car2_startx + self.enemy_car2_width or self.player[4] + 49 > self.enemy_car2_startx and self.player[4] + 49 < self.enemy_car2_startx + self.enemy_car2_width:
                     self.crashed = True
                     #self.display_message("Game Over !!!")
-                    self.player.count -= 100
+                    self.player[6] -= 100
                     self.display_message("Crashed -100")
 
-            if self.player.car_x_coordinate < 50 or self.player.car_x_coordinate > 950:
+            if self.player[4] < 50 or self.player[4] > 950:
                 self.crashed = True
-                self.player.count -= 1000
+                self.player[6] -= 1000
                 self.display_message("Out Of Bound -1000")
 
             pygame.display.update()
@@ -214,7 +208,6 @@ class CarRacing:
         self.clock.tick(60)
         car_racing.initialize()
         self.client.closeconn()
-
 
     def back_ground_road(self):
         self.gameDisplay.blit(self.bgImg, (self.bg_x1, self.bg_y1))
@@ -245,18 +238,18 @@ class CarRacing:
         dis = 100
         disconnected = []
         for opponent in self.opponents:
-            print("OPPONENT: ",opponent.disconnect)
-            if opponent.disconnect == 1:
+            print("OPPONENT: ",opponent[-2])
+            if opponent[-2] == 1:
                 font = pygame.font.SysFont("arial", 20)
-                disconnectMsg = "Player"+str(opponent.Player_num)+" Disconnected"
+                disconnectMsg = "Player"+str(opponent[3])+" Disconnected"
                 text = font.render(disconnectMsg, True, self.white)
                 self.gameDisplay.blit(text, (1055, dis))
-                disconnected.append(opponent.Player_num-1)
+                disconnected.append(opponent[3]-1)
                 dis -= 20
             else:
-                all_scores.append({oppnum, opponent.count})
+                all_scores.append(opponent[6])
 
-        all_scores.insert(self.player.Player_num-1,self.player.count)
+        all_scores.insert(self.player[3]-1, self.player[6])
         all_scores_sorted = all_scores.copy()
 
         all_scores_sorted.sort(reverse=True)
