@@ -21,18 +21,7 @@ class ClientThread(threading.Thread):
         elif(logchoose==1):
             self.player = list(DB.signup(self.csocket))
         print(self.player)
-        # print(self.number_of_players)
         
-        # Check if game exists
-        
-        # self.game = 0
-        # for game in ClientThread.games:
-        #     if (game.number_of_players == self.number_of_players) and game.start==0: #and game.start==0
-        #         self.game = game
-        #         print("Game exists")
-        # if isinstance(self.game, int):
-        #     self.game = Game(self.number_of_players)
-        #     ClientThread.games.append(self.game)
         
 
         print("[+] New thread started")
