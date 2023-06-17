@@ -6,10 +6,16 @@ PORT = 10000
 MSGSIZE = 2048
 HOST = 'localhost'
 
-
+def get_elements_except_key(dict, key):
+    x = dict.copy()
+    try:
+        x.pop(key)
+    except KeyError:
+        pass
+    return x
 
 class ClientThread(threading.Thread):
-    
+    rooms = {}
     
     def __init__(self, clientsocket):
         threading.Thread.__init__(self)
@@ -20,10 +26,20 @@ class ClientThread(threading.Thread):
             self.player = list(DB.loginToGame(self.csocket))
         elif(logchoose==1):
             self.player = list(DB.signup(self.csocket))
+        
+        
+        try:
+            ClientThread.rooms[
+                self.player[2]].update(
+                    {self.player[0]: self.player})
+        except:
+            ClientThread.rooms[self.player[2]] = {}
+        
+        ClientThread.rooms[
+            self.player[2]][
+                self.player[0]] = self.player
+        print(ClientThread.rooms)
         print(self.player)
-        
-        
-
         print("[+] New thread started")
 
     def run(self):
@@ -34,11 +50,11 @@ class ClientThread(threading.Thread):
         #sending to waiting for players
         while True:
             room = DB.getRoom(self.player[2])[2]
-            countplayers = DB.getCountPlayers(self.player[2])
+            countplayers = len(ClientThread.rooms[self.player[2]])
             print("PLAYER_NUM",self.player[3])
             print("NUMBER OF PLAYERS", room)
             while countplayers < room:
-                countplayers = DB.getCountPlayers(self.player[2])
+                countplayers = len(ClientThread.rooms[self.player[2]])
                 self.csocket.send(pickle.dumps(0))
                 sleep(1)
             sleep(1)
@@ -46,17 +62,21 @@ class ClientThread(threading.Thread):
             break
 
         while True:
+            
             try:
                 data = pickle.loads(self.csocket.recv(2048))
-
                 if not data:
                     print("Player"+str(self.player[3])+" Disconnected")
                     #self.player.disconnect = 1
-                    self.player[-2] = 1
+                    ClientThread.rooms[
+                        self.player[2]][
+                            self.player[0]][-2] = 1
                     break
                 else:
-                    self.player = data
-                    reply = DB.getOpponents(self.player[0])
+                    ClientThread.rooms[self.player[2]][self.player[0]] = data
+                    
+                    reply = get_elements_except_key(ClientThread.rooms[self.player[2]], data[0])
+                    reply = list(reply.values())
                     print("Received: ", data)
                     print("Sending : ", reply)
 

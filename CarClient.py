@@ -126,11 +126,11 @@ class CarRacing:
                 if (event.type == pygame.KEYDOWN):
                     if (event.key == pygame.K_LEFT):
                         self.player[4] -= 50
-                        print("CAR X COORDINATES: %s" % self.player[4])
+                        #print("CAR X COORDINATES: %s" % self.player[4])
                     if (event.key == pygame.K_RIGHT):
                         self.player[4] += 50
-                        print("CAR X COORDINATES: %s" % self.player[4])
-                    print("x: {x}, y: {y}".format(x=self.player[4], y=self.player[5]))
+                        #print("CAR X COORDINATES: %s" % self.player[4])
+                    #print("x: {x}, y: {y}".format(x=self.player[4], y=self.player[5]))
 
             self.gameDisplay.fill(self.black)
             self.back_ground_road()
@@ -151,6 +151,8 @@ class CarRacing:
 
 
             self.opponents = self.client.send(self.player)
+            print('Me: '+str(self.player[0]))
+            print('Opp:'+str(self.opponents))
             self.drawOpp()
             self.car(self.player[4], self.player[5])
 
