@@ -14,14 +14,14 @@ class ClientThread(threading.Thread):
     def __init__(self, clientsocket):
         threading.Thread.__init__(self)
         self.csocket = clientsocket
-        
         logchoose = pickle.loads(self.csocket.recv(MSGSIZE))
         print(logchoose)
-        if(logchoose==1):
-            self.player = DB.loginToGame()
-        elif(logchoose==2):
-            self.player = DB.signup()
+        if(logchoose==2):
+            self.player = DB.loginToGame(self.csocket)
+        elif(logchoose==1):
+            self.player = DB.signup(self.csocket)
         
+        print(self.player)
         # print(self.number_of_players)
         
         # Check if game exists

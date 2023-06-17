@@ -1,4 +1,6 @@
 import MySQLdb
+import pickle
+MSGSIZE = 2048
 
 db = MySQLdb.connect(host='localhost',  # your host, usually localhost
                      user='root',       # your username
@@ -7,32 +9,41 @@ db = MySQLdb.connect(host='localhost',  # your host, usually localhost
 
 cur = db.cursor()
 
-def signup():
-    username = str(input('Enter a username: '))
+def signup(csocket):
+    csocket.send(pickle.dumps('Signing Up: '))
+    username = pickle.loads(csocket.recv(MSGSIZE))
     while True:
         try:
-            cur.execute("INSERT INTO player (username, xCoord, yCoord) VALUES ('"+username+"', 0, 0)")
-            print('Signed up')
+            cur.execute("INSERT INTO player (username, xCoord, yCoord) VALUES ('"
+                        +username+"', 0, 0)")
+            csocket.send(pickle.dumps(1))
+            csocket.send(pickle.dumps('Signed Up: '))
+            print(pickle.loads(csocket.recv(MSGSIZE)))
             break
         except:
-            username = str(input('Please Re-enter a correct username: '))
+            csocket.send(pickle.dumps(0))
+            username = pickle.loads(csocket.recv(MSGSIZE))
             continue
     db.commit()
-    return loginToGame()
+    return loginToGame(csocket)
     
-def loginToGame():
-    user = str(input('Enter your username: '))
+def loginToGame(csocket):
+    csocket.send(pickle.dumps('Logging in: '))
+    user = pickle.loads(csocket.recv(MSGSIZE))
     while True:
         cur.execute("SELECT * FROM player WHERE username= '"+user+"'")
         account = cur.fetchone()
         if not account:
-            print('User not found\n')
-            user = str(input('Please enter a correct username: '))
+            csocket.send(pickle.dumps(0))
+            csocket.send(pickle.dumps('User not found\n'))
+            user = pickle.loads(csocket.recv(MSGSIZE))
             continue
         else:
+            csocket.send(pickle.dumps(1))
             if not account[2]>0:
-                roomname = str(input('Enter room name: '))
-                numPlayers = str(int(input('Enter number of players: ')))
+                csocket.send(pickle.dumps(2))
+                roomname = pickle.loads(csocket.recv(MSGSIZE))
+                numPlayers = pickle.loads(csocket.recv(MSGSIZE))
                 while True:
                     try:
                         cur.execute("INSERT INTO room (rName, numPlayers) VALUES ('"
@@ -40,14 +51,20 @@ def loginToGame():
                         db.commit()
                         cur.execute("SELECT rID FROM room WHERE rName='"+roomname+"'")
                         rID = cur.fetchone()[0]
-                        cur.execute('UPDATE player SET rID = '
-                                    +rID+' WHERE pID = '+account[0])
+                        cur.execute("UPDATE player SET rID = '"
+                                    +str(rID)+"' WHERE pID = '"+str(account[0])+"'")
                         db.commit()
+                        csocket.send(pickle.dumps(4))
+                        print(pickle.loads(csocket.recv(MSGSIZE)))
                         break
                     except:
-                        print('Error! enter correct details')
-                        roomname = str(input('Enter room name: '))
-                        numPlayers = str(int(input('Enter number of players: ')))
+                        csocket.send(pickle.dumps(5))
+                        csocket.send(pickle.dumps(
+                            'Error! enter correct details'))
+                        roomname = pickle.loads(csocket.recv(MSGSIZE))
+                        numPlayers = pickle.loads(csocket.recv(MSGSIZE))
+            else:
+                csocket.send(pickle.dumps(3))
             break
     cur.execute("SELECT * FROM player WHERE username= '"+user+"'")
     account = cur.fetchone()

@@ -4,6 +4,7 @@ import pygame
 import pickle
 import socket, threading
 from cargame import *
+import ClientFunctions as CF
 
 HOST = 'localhost'
 PORT = 10000
@@ -16,13 +17,17 @@ class ClientSocket:
         self.csocket.connect((HOST, PORT))
         #login/signup
         
-        chooseLogin = int(input('Choose 1 to login or 2 to signup:'))
+        chooseLogin = int(input('Choose 1 to signup or 2 to login:'))
         while True:
             if not (chooseLogin == 1 or chooseLogin ==2):
                 chooseLogin = int(input('Please enter a correct choice: '))
             else: break
         print(chooseLogin)
         self.csocket.send(pickle.dumps(chooseLogin))
+        if chooseLogin==2:
+            CF.cLogin(self.csocket)
+        elif chooseLogin==1:
+            CF.cSignup(self.csocket)
         
         self.player = pickle.loads(self.csocket.recv(MSGSIZE))
         print(pickle.loads(self.csocket.recv(MSGSIZE)))
