@@ -41,14 +41,15 @@ class ClientThread(threading.Thread):
     def run(self):
         print("new Connection")
         self.csocket.send(pickle.dumps(self.player))
-
         self.csocket.send(pickle.dumps("Welcome to the multi-threaded server"))
+        
         #sending to waiting for players
         while True:
-            print("PLAYER_NUM",self.game.player_counter)
-            print("NUMBER OF PLAYERS", self.game.number_of_players)
-            while self.game.player_counter < self.game.number_of_players:
-                self.csocket.send(pickle.dumps('asd'))
+            room = DB.getRoom(self.player[2])
+            print("PLAYER_NUM",self.player[3])
+            print("NUMBER OF PLAYERS", room[2])
+            while self.player[3] < room[2]:
+                self.csocket.send(pickle.dumps(0))
                 sleep(1)
             sleep(1)
             self.csocket.send(pickle.dumps("start"))

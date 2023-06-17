@@ -58,6 +58,8 @@ class CarRacing:
         self.gameDisplay = None
         self.client = ClientSocket()
         self.player = self.client.player
+        print(self.player)
+        self.player.append('.\\img\\car'+str(self.player[3])+'.png')
         self.carImg = pygame.image.load(self.player.filepath)
         self.initialize()
 

@@ -49,10 +49,21 @@ def loginToGame(csocket):
                         cur.execute("INSERT INTO room (rName, numPlayers) VALUES ('"
                                     +roomname+"', '"+numPlayers+"')")
                         db.commit()
-                        cur.execute("SELECT rID FROM room WHERE rName='"+roomname+"'")
+                        cur.execute("SELECT rID FROM room WHERE rName='"
+                                    +roomname+"'")
                         rID = cur.fetchone()[0]
                         cur.execute("UPDATE player SET rID = '"
-                                    +str(rID)+"' WHERE pID = '"+str(account[0])+"'")
+                                    +str(rID)+"' WHERE pID = '"
+                                    +str(account[0])+"'")
+                        db.commit()
+                        cur.execute(
+                            "SELECT COUNT(*) FROM player WHERE rID= "+
+                            "(SELECT rID FROM player WHERE pID = '"
+                            +str(account[0])+"')")
+                        counter = cur.fetchone()
+                        cur.execute("UPDATE player SET counter ='"
+                                    +str(counter[0])+"' WHERE pID = '"
+                                    +str(account[0])+"'")
                         db.commit()
                         csocket.send(pickle.dumps(4))
                         print(pickle.loads(csocket.recv(MSGSIZE)))
@@ -69,3 +80,7 @@ def loginToGame(csocket):
     cur.execute("SELECT * FROM player WHERE username= '"+user+"'")
     account = cur.fetchone()
     return account
+
+def getRoom(rID):
+    cur.execute("SELECT * FROM room WHERE rID = '"+str(rID)+"'")
+    return cur.fetchone()
