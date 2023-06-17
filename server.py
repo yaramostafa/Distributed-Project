@@ -73,7 +73,7 @@ class ClientThread(threading.Thread):
                 break
 
 host = "0.0.0.0"
-port = 10000
+port = 10001
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
