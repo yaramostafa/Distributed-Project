@@ -1,4 +1,5 @@
 import pickle
+from time import sleep
 
 
 def send(csocket, data):
@@ -8,45 +9,36 @@ def receive(csocket):
     return pickle.loads(csocket.recv(2048))
 
 def cLogin(csocket):
-    print(receive(csocket))
-    user = str(input('Enter your username: '))
-    send(csocket,user)
+    
+    print('Logging in: ')
+    username = str(input('Enter your username: '))
+    print('Press 0 to create a room')
+    print('Press 1 to join a room')
+    create_join = int(input('Your Choice: '))
+    while not (create_join==1 or create_join==0):
+        create_join = int(input('Error! Press 1 or 0: '))
+        sleep(1)
+    roomname = str(input('Enter Room name:'))
+    if create_join==0:
+        numplayers = -1
+        while numplayers < 1:
+            try:
+                numplayers = int(input('Enter Number of player: '))
+            except:
+                numplayers = input('Error! Enter a correct number:')
+            sleep(1)
+    else:
+        numplayers = -1 # dummy number
+    send(csocket, [username, roomname, numplayers])
     ack = receive(csocket)
-    while True:
-        if ack==0:
-            print(receive(csocket))
-            user = str(input(
-                'Please enter a correct username: '))
-            send(csocket,user)
-            continue
-        else:
-            ack = receive(csocket)
-            if ack==2:
-                print(receive(csocket))
-                print(receive(csocket))
-                createorjoin = int(input('Your Choice: '))
-                send(csocket, createorjoin)
-                while createorjoin != 1 and createorjoin !=2:
-                    createorjoin = int(
-                        input('Enter a correct choice: '))
-                if createorjoin==1:
-                    cCreateRoom(csocket)
-                else:
-                    roomname = input("Enter room name: ")
-                    send(csocket, roomname)
-                    ack = receive(csocket)
-                    while ack==1:
-                        roomname = input("Enter a correct"+
-                                         "/avaliable room name: ")
-                        send(csocket, roomname)
-                        ack = receive(csocket)
-                    send(csocket, 'ok')
-            break
+    if ack == -1:
+        sleep(1)
+        cLogin(csocket)
+    
     
     
     
 def cSignup(csocket):
-    print(receive(csocket))
     username = str(input('Enter a username: '))
     send(csocket,username)
     while True:

@@ -1,11 +1,34 @@
 import MySQLdb
 import pickle
+from time import sleep
 
 def send(csocket, data):
     csocket.send(pickle.dumps(data))
 
 def receive(csocket):
     return pickle.loads(csocket.recv(2048))
+
+def set(exp: str):
+    try:
+        cur.execute(exp)
+        db.commit()
+        return 1
+    except:
+        return -1
+
+def get(exp: str):
+    try:
+        cur.execute(exp)
+        return cur.fetchone()
+    except:
+        return [-1]
+    
+def getall(exp: str):
+    try:
+        cur.execute(exp)
+        return cur.fetchall()
+    except:
+        return [-1]
 
 db = MySQLdb.connect(host='localhost',  # your host, usually localhost
                      user='root',       # your username
@@ -28,107 +51,66 @@ def signup(csocket):
         except:
             send(csocket, 0)
             username = receive(csocket)
+            sleep(1)
             continue
     db.commit()
-    return loginToGame(csocket)
+    return sLogin(csocket)
     
 def loginToGame(csocket):
-    send(csocket, 'Logging in: ')
-    user = receive(csocket)
-    while True:
-        cur.execute("SELECT * FROM player WHERE username= '"
-                    +user+"'")
-        account = cur.fetchone()
-        if not account:
-            send(csocket, 0)
-            send(csocket, 'User not found\n')
-            user = receive(csocket)
-            continue
-        else:
-            send(csocket, 1)
-            if not account[2]>0:
-                send(csocket, 2)
-                send(csocket,'Press 1 to Create a room')
-                send(csocket,'Press 2 to join an exisiting room')
-                createorjoin = receive(csocket)
-                if createorjoin==1:
-                    createRoom(csocket, account)
-                elif createorjoin==2:
-                    roomname=receive(csocket)
-                    cur.execute("SELECT * FROM room WHERE rName = '"
-                                +roomname+"'")
-                    room = cur.fetchone()
-                    cur.execute("SELECT COUNT(*) FROM player "
-                                +"WHERE rID = '"+str(room[0])+"'")
-                    currplayers = cur.fetchone()[0]
-                    while not (currplayers<room[2] or room):
-                        send(csocket, 1)
-                        roomname = receive(csocket)
-                        cur.execute("SELECT * FROM room WHERE rName = '"
-                                    +roomname+"'")
-                        room = cur.fetchone()
-                        cur.execute("SELECT COUNT(*) FROM player "+
-                                    "WHERE rID = '"+str(room[0])+"'")
-                        currplayers = cur.fetchone()[0]
-                    
-                    send(csocket, 0)
-                    finalizePlayer(room[0], account)
-                    print(receive(csocket))
-            else:
-                updatePlayer(account, 0)
-                send(csocket, 3)
-            break
-    cur.execute("SELECT * FROM player WHERE username= '"
-                +user+"'")
-    account = cur.fetchone()
+    #returns    account in case of success
+    #           [-1]    in case of failure
+    username, roomname, numplayers = receive(csocket)
+    account = get("SELECT * FROM player WHERE username= '"+username+"'")
+    if account[0]==-1: return [-1]
+    elif account[2]>0:
+        _ = set("UPDATE player SET dc = '0' WHERE pID = '"
+                     +account[0]+"'")
+        return account
+    
+    if numplayers == -1:
+        room = get("SELECT * FROM room WHERE rName = '"+roomname+"'")
+        if room[0]==-1: return [-1]
+        
+        currplayers = get("SELECT COUNT(*) FROM player WHERE rID = '"
+                          +str(room[0])+"'")
+        if not currplayers[0]<room[2]: return [-1]
+        
+        
+        status = set("UPDATE player SET rID = '"
+                     +str(room[0])+"', dc = '0', xCoord = '"
+                     +str(1300 * (0.1+0.2*(currplayers[0])))+"', "
+                     +"yCoord = '480', filepath = '.\\\img\\\car"
+                     +str(currplayers[0]+1)+".png', counter ='"
+                     +str(currplayers[0]+1)+"' WHERE pID = '"
+                     +str(account[0])+"'")
+        if status==-1: return [-1]
+        
+    else:
+        status = set("INSERT INTO room (rName, numPlayers) VALUES ('"+roomname+"', '"+str(numplayers)+"')")
+        if status==-1: return -1
+        rID = get("SELECT rID FROM room WHERE rName='"+roomname+"'")
+        if rID[0]==-1: return [-1]
+        status = set("UPDATE player SET rID = '"
+                     +str(rID[0])+"', dc = '0',"
+                     +" xCoord = '130', yCoord = '480',"
+                     +" filepath = '.\\\img\\\car1.png',"
+                     +" counter ='1' WHERE pID = '"
+                     +str(account[0])+"'")
+        if status==-1: return [-1]
     return account
 
-def getRoom(rID):
-    cur.execute("SELECT * FROM room WHERE rID = '"
-                +str(rID)+"'")
-    return cur.fetchone()
+def sLogin(csocket):
+    ack = loginToGame(csocket)
+    if ack[0]==-1:
+        send(csocket, -1)
+        sleep(1)
+        return sLogin(csocket)
+    return ack
 
-def createRoom(csocket, account):
-    roomname = receive(csocket)
-    numPlayers = receive(csocket)
-    while True:
-        try:
-            cur.execute("INSERT INTO room (rName, numPlayers) VALUES ('"
-                        +roomname+"', '"+numPlayers+"')")
-            db.commit()
-            cur.execute("SELECT rID FROM room WHERE rName='"
-                        +roomname+"'")
-            rID = cur.fetchone()[0]
-            finalizePlayer(rID, account)
-            send(csocket, 4)
-            print(receive(csocket))
-            break
-        except:
-            send(csocket, 5)
-            send(csocket, 'Error! enter correct details')
-            roomname = receive(csocket)
-            numPlayers = receive(csocket)
+def getRoom(rID):
+    cur.execute("SELECT * FROM room WHERE rID = '"+str(rID)+"'")
+    return cur.fetchone()
             
-            
-def finalizePlayer(rID, account):
-    cur.execute("UPDATE player SET rID = '"
-                +str(rID)+"', dc = '0' "+
-                " WHERE pID = '"
-                +str(account[0])+"'")
-    db.commit()
-    cur.execute(
-        "SELECT COUNT(*) FROM player WHERE rID= "+
-        "(SELECT rID FROM player WHERE pID = '"
-        +str(account[0])+"')")
-    counter = cur.fetchone()
-    cur.execute("UPDATE player SET xCoord = '"
-                +str(1300 * (0.1+0.2*(counter[0]-1)))+
-                "', yCoord = '"
-                +str(600 * 0.8)+"', filepath = '.\\\img\\\car"
-                +str(counter[0])+".png', counter ='"
-                +str(counter[0])+"' WHERE pID = '"
-                +str(account[0])+"'")
-    db.commit()
     
 def getOpponents(pID):
     cur.execute("SELECT * FROM player WHERE"+
@@ -140,19 +122,12 @@ def getOpponents(pID):
         x+=[i]
     return x
 
-def getCountPlayers(rID):
-    cur.execute("SELECT COUNT(*) FROM player WHERE"+
-                " rID = '"+str(rID)+"'")
-    return cur.fetchone()[0]
-
 def updatePlayer(player, dc):
-    cur.execute("UPDATE player SET xCoord = '"+str(player[4])+"',"+
+    _ = set("UPDATE player SET xCoord = '"+str(player[4])+"',"+
                 " yCoord = '"+str(player[5])+"', score = '"+str(player[6])+"',"+
                 " dc = '"+str(dc)+"' WHERE pID = '"+str(player[0])+"'")
-    db.commit()
     
 def deleteRoom(rID):
-    cur.execute("DELETE FROM player WHERE rID = '"+str(rID)+"'")
-    cur.execute("DELETE FROM room WHERE rID = '"+str(rID)+"'")
-    db.commit()
+    _ = set("DELETE FROM player WHERE rID = '"+str(rID)+"'")
+    _ = set("DELETE FROM room WHERE rID = '"+str(rID)+"'")
     

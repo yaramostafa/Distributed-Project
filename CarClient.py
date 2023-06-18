@@ -270,7 +270,7 @@ class CarRacing:
             text = font.render(msg, True, self.white)
             self.gameDisplay.blit(text, (1055, i))
             i+=20
-        if all_scores_sorted[0] >= 1000:
+        if all_scores_sorted[0] >= 20000:
             return str(all_scores_sorted[0])
         else:
             return -1

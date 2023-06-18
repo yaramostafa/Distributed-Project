@@ -22,7 +22,7 @@ class ClientThread(threading.Thread):
         logchoose = pickle.loads(self.csocket.recv(MSGSIZE))
         print(logchoose)
         if(logchoose==2):
-            self.player = list(DB.loginToGame(self.csocket))
+            self.player = list(DB.sLogin(self.csocket))
         elif(logchoose==1):
             self.player = list(DB.signup(self.csocket))
         print("user: '"+ str(self.player[0])+"' Started")
@@ -61,7 +61,6 @@ class ClientThread(threading.Thread):
             break
 
         while True:
-            
             try:
                 data = pickle.loads(self.csocket.recv(2048))
                 if not data:
