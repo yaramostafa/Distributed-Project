@@ -19,14 +19,18 @@ def set(exp: str):
 def get(exp: str):
     try:
         cur.execute(exp)
-        return cur.fetchone()
+        x = cur.fetchone()
+        if not x: return [-1]
+        return list(x)
     except:
         return [-1]
     
 def getall(exp: str):
     try:
         cur.execute(exp)
-        return cur.fetchall()
+        x = cur.fetchall()
+        if not x: return [-1]
+        return list(x)
     except:
         return [-1]
 
@@ -38,22 +42,14 @@ db = MySQLdb.connect(host='localhost',  # your host, usually localhost
 cur = db.cursor()
 
 def signup(csocket):
-    send(csocket, 'Signing Up: ')
-    username = receive(csocket)
-    while True:
-        try:
-            cur.execute("INSERT INTO player (username, xCoord, yCoord) VALUES ('"
-                        +username+"', 0, 0)")
-            send(csocket, 1)
-            send(csocket, 'Signed Up: ')
-            print(receive(csocket))
-            break
-        except:
-            send(csocket, 0)
-            username = receive(csocket)
-            sleep(1)
-            continue
-    db.commit()
+    ack = [-1]
+    while ack[0]==-1:
+        username = receive(csocket)
+        ack = set("INSERT INTO player"+
+                     " (username, xCoord, yCoord) VALUES"
+                     +" ('"+username+"', 0, 0)")
+        ack = [ack]
+        send(csocket, ack)
     return sLogin(csocket)
     
 def loginToGame(csocket):
@@ -63,8 +59,8 @@ def loginToGame(csocket):
     account = get("SELECT * FROM player WHERE username= '"+username+"'")
     if account[0]==-1: return [-1]
     elif account[2]>0:
-        _ = set("UPDATE player SET dc = '0' WHERE pID = '"
-                     +account[0]+"'")
+        _ = set("UPDATE player SET dc = '0' WHERE pID = '"+str(account[0])+"'")
+        account[7] = 0
         return account
     
     if numplayers == -1:
@@ -87,7 +83,7 @@ def loginToGame(csocket):
         
     else:
         status = set("INSERT INTO room (rName, numPlayers) VALUES ('"+roomname+"', '"+str(numplayers)+"')")
-        if status==-1: return -1
+        if status==-1: return [-1]
         rID = get("SELECT rID FROM room WHERE rName='"+roomname+"'")
         if rID[0]==-1: return [-1]
         status = set("UPDATE player SET rID = '"
@@ -97,14 +93,16 @@ def loginToGame(csocket):
                      +" counter ='1' WHERE pID = '"
                      +str(account[0])+"'")
         if status==-1: return [-1]
+        
+    account = get("SELECT * FROM player WHERE pID = '"
+                  +str(account[0])+"'")
     return account
 
 def sLogin(csocket):
-    ack = loginToGame(csocket)
-    if ack[0]==-1:
-        send(csocket, -1)
-        sleep(1)
-        return sLogin(csocket)
+    ack = [-1]
+    while ack[0]==-1:
+        ack = list(loginToGame(csocket))
+        send(csocket, ack)
     return ack
 
 def getRoom(rID):

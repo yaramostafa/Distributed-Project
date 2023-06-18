@@ -25,7 +25,7 @@ class ClientSocket:
             CF.cSignup(self.csocket)
         
         self.player = pickle.loads(self.csocket.recv(MSGSIZE))
-        print(pickle.loads(self.csocket.recv(MSGSIZE)))
+        
 
     def send(self, data):
         try:

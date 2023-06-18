@@ -22,9 +22,9 @@ class ClientThread(threading.Thread):
         logchoose = pickle.loads(self.csocket.recv(MSGSIZE))
         print(logchoose)
         if(logchoose==2):
-            self.player = list(DB.sLogin(self.csocket))
+            self.player = DB.sLogin(self.csocket)
         elif(logchoose==1):
-            self.player = list(DB.signup(self.csocket))
+            self.player = DB.signup(self.csocket)
         print("user: '"+ str(self.player[0])+"' Started")
         
         try:
@@ -44,7 +44,7 @@ class ClientThread(threading.Thread):
     def run(self):
         print("new Connection")
         self.csocket.send(pickle.dumps(self.player))
-        self.csocket.send(pickle.dumps("Welcome to the multi-threaded server"))
+        sleep(1)
         
         #sending to waiting for players
         while True:
