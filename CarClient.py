@@ -165,6 +165,8 @@ class CarRacing:
             if (self.player[6] % 100 == 0):
                 self.enemy_car_speed += 1
                 self.bg_speed += 1
+                if(self.player[6]%500 == 0):
+                    print(self.client.send(2))
                 # call db query
                 print("Milestone Reached!")
             if self.player[5] < self.enemy_car_starty + self.enemy_car_height:

@@ -71,8 +71,19 @@ class ClientThread(threading.Thread):
                     ClientThread.rooms[
                         self.player[2]][
                             self.player[0]][-2] = 1
+                    DB.updatePlayer(ClientThread.
+                                        rooms[self.player[2]]
+                                        [self.player[0]])
+                    print("updated")
                     break
                 else:
+                    if data == 2:
+                        DB.updatePlayer(ClientThread.
+                                        rooms[self.player[2]]
+                                        [self.player[0]])
+                        self.csocket.send(pickle.dumps('Updated'))
+                        print("updated")
+                        continue
                     ClientThread.rooms[self.player[2]][self.player[0]] = data
                     
                     reply = get_elements_except_key(ClientThread.rooms[self.player[2]], data[0])
