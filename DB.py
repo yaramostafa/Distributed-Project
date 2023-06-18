@@ -33,7 +33,7 @@ def getall(exp: str):
         return list(x)
     except:
         return [-1]
-db = MySQLdb.connect(host='terraform-20230618212338301200000001.csh8tbkzf6ga.us-east-1.rds.amazonaws.com',  # your host, usually localhost
+db = MySQLdb.connect(host='terraform-20230618215956453300000001.csrfrlxf5pji.us-east-1.rds.amazonaws.com',  # your host, usually localhost
                      user='root',       # your username
                      passwd='G3F3yeUwkCE#EfJ',         # your password
                      db='mydb')
