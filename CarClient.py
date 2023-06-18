@@ -34,7 +34,6 @@ class ClientSocket:
         except:
             pass
     def closeconn(self):
-        print("ana afalt msh afelt")
         self.csocket.send(pickle.dumps(0))
 
     def recieve(self):
