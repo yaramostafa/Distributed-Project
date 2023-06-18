@@ -1,4 +1,4 @@
-import socket, threading, select
+import socket, threading
 
 
 class Client:
@@ -57,20 +57,11 @@ class ClientThread(threading.Thread):
                 else:
                     self.sendtoall(data)
 
-            # self.clientSocketSend[self.id].send(str.encode("--------------------------Disconnected---------------------------"))
             disconnectMsg = name + " disconnected from chat"
             self.sendtoall(disconnectMsg.encode())
-            # index = self.clientSockets.index(self.csocket)
-            # self.clientSockets[index-1].close()
-            # del self.clientSockets[index]
-            # del self.clientSockets[index-1]
-            # print("New ClientSocketList: ",self.clientSockets)
             self.clientSocketSend[self.id].close()
             ClientThread.clientSocketSend[self.id] = 0
             self.csocket.close()
-            # data = name.replace(" ", "") + " just left the chat.."
-            # for client in self.clientSockets[::2]:
-            #     client.send(data.encode())
             print("Client at ",self.ip," disconnected...")
 
     def newmember(self,name):
@@ -85,7 +76,7 @@ class ClientThread(threading.Thread):
                 print("Sent ", data, " to ", client)
 
 host = "0.0.0.0"
-port = 10000
+port = 10001
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

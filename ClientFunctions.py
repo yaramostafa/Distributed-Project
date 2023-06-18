@@ -1,98 +1,49 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QFont
-from PyQt5 import uic
-import socket, threading
+import pickle
+from time import sleep
 
 
-class ClientSocket(threading.Thread):
-    def __init__(self,type):
-        threading.Thread.__init__(self)
-        host = 'localhost'
-        port = 10000
-        self.size = 2048
+def send(csocket, data):
+    csocket.send(pickle.dumps(data))
 
-        self.csocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.csocket.connect((host, port))
-        self.type = type
-        if self.type == 'recv':
-            data = self.csocket.recv(self.size)
-            if len(data):
-                print('Received:', data.decode('utf-8'))
-    def run(self):
-        if self.type == 'recv':
-            data = self.csocket.recv(2048)
-            self.item.append(str(data.decode()))
-            while len(data):
-                data = self.csocket.recv(2048)
-                print("Data: ", data.decode())
+def receive(csocket):
+    return pickle.loads(csocket.recv(2048))
 
-                if self.name+" disconnected from chat" == data.decode():
-                    self.item.append(str(data.decode()))
-                    data = ''
-                    print(self.name+" disconnected from chat")
-                    print("QUIT")
-                else:
-                    self.item.append(str(data.decode()))
-            data = self.csocket.recv(2048)
-            self.item.append(str(data.decode()))
-            self.csocket.close()
-
-
-    def sendToServer(self,text):
-        self.csocket.send(text.encode())
-    # def recieveFromServer(self):
-    #     try:
-    #         self.csocket.recv(self.size)
-    #
-    #     except socket.timeout as e:
-    #         err = e.args[0]
-    #         if err == 'timed out':
-    #             print('recv timed out, retry later')
-    #             return ""
-
-class MyGUI(QMainWindow):
-    def __init__(self):
-        self.ClientSocketRec = ClientSocket('recv')
-        self.ClientSocketSend = ClientSocket('send')
-        self.ClientSocketSend.start()
-        super(MyGUI,self).__init__()
-        uic.loadUi("chatgui.ui",self)
-        self.show()
-        self.Name.setFont(QFont('Arial', 14))
-        self.msgBox.setFont(QFont('Arial', 13))
-        self.pushButton.clicked.connect(lambda: self.send(self.msg.toPlainText()))
-        name = input("Enter your Name: ")
-        self.pushButton.setEnabled(True)
-        self.msg.setEnabled(True)
-        self.name = name
-        self.ClientSocketRec.item = self.msgBox
-        self.ClientSocketRec.name = self.name
-        self.ClientSocketRec.start()
-        self.ClientSocketSend.sendToServer(name)
-        self.Name.setText(name)
-
-
-    def closeEvent(self, *args, **kwargs):
-        super(QMainWindow, self).closeEvent(*args, **kwargs)
-        self.ClientSocketSend.sendToServer(self.name+": quit")
-        self.ClientSocketSend.csocket.close()
-        print("Just closed the window!")
-
-    def send(self, msg):
-        if len(msg) > 0:
-            print("Sent!")
-            Name = self.Name.text()
-            msgToSend = Name+": "+msg
-            print(msgToSend)
-            self.ClientSocketSend.sendToServer(msgToSend)
-            # if msgToSend.split(":")[1].replace(" ","") == "quit":
-            #     self.ClientSocketSend.csocket.close()
-            self.msg.setText('')
+def cLogin(csocket):
+    ack = [-1]
+    while ack[0] ==-1:
+        print('Logging in: ')
+        username = str(input('Enter your username: '))
+        print('Press 0 to create a room: ')
+        print('Press 1 to join a room: ')
+        create_join = int(input('Your Choice: '))
+        while not (create_join==1 or create_join==0):
+            create_join = int(input('Error! Press 1 or 0: '))
+            sleep(1)
+        roomname = str(input('Enter Room name: '))
+        if create_join==0:
+            numplayers = -1
+            while numplayers < 1:
+                try:
+                    numplayers = int(input('Enter Number of players: '))
+                except:
+                    numplayers = input('Error! Enter a correct number: ')
+                sleep(1)
         else:
-            print("Write a Msg!")
-            message = QMessageBox()
-            message.setText("Write a msg!")
-            message.exec_()
-
-
-
+            numplayers = -1 # dummy number
+        send(csocket, [username, roomname, numplayers])
+        ack = receive(csocket)
+        if ack[0]==-1:
+            print("Error! Enter Correct data\n\n")
+            
+    return username
+    
+def cSignup(csocket):
+    ack = [-1]
+    while ack[0]==-1:
+        username = str(input('Enter a username: '))
+        send(csocket,username)
+        ack = receive(csocket)
+        if ack[0]==-1:
+            print("Error! Enter another username ")
+    return cLogin(csocket)
+    
