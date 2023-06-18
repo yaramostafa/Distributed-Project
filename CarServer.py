@@ -1,6 +1,5 @@
-import socket, threading, pickle
-from cargame import *
-import DB
+import socket, threading, pickle, DB
+from time import sleep
 
 PORT = 10000
 MSGSIZE = 2048
@@ -26,7 +25,7 @@ class ClientThread(threading.Thread):
             self.player = list(DB.loginToGame(self.csocket))
         elif(logchoose==1):
             self.player = list(DB.signup(self.csocket))
-        
+        print("user: '"+ str(self.player[0])+"' Started")
         
         try:
             ClientThread.rooms[
@@ -66,24 +65,30 @@ class ClientThread(threading.Thread):
             try:
                 data = pickle.loads(self.csocket.recv(2048))
                 if not data:
-                    print("Player"+str(self.player[3])+" Disconnected")
+                    print("Player"+str(self.player[3])
+                          +" Disconnected")
                     #self.player.disconnect = 1
                     ClientThread.rooms[
                         self.player[2]][
                             self.player[0]][-2] = 1
                     DB.updatePlayer(ClientThread.
                                         rooms[self.player[2]]
-                                        [self.player[0]])
+                                        [self.player[0]], 1)
+                    ClientThread.rooms[
+                        self.player[2]].pop(self.player[0])
+                    if not ClientThread.rooms[self.player[2]]:
+                        ClientThread.rooms.pop(self.player[2])
+                        DB.deleteRoom(self.player[2])
                     print("updated")
                     break
                 else:
-                    if data == 2:
-                        DB.updatePlayer(ClientThread.
-                                        rooms[self.player[2]]
-                                        [self.player[0]])
-                        self.csocket.send(pickle.dumps('Updated'))
-                        print("updated")
-                        continue
+                    # if data == 2:
+                    #     DB.updatePlayer(ClientThread.
+                    #                     rooms[self.player[2]]
+                    #                     [self.player[0]])
+                    #     self.csocket.send(pickle.dumps('Updated'))
+                    #     print("updated")
+                    #     continue
                     ClientThread.rooms[self.player[2]][self.player[0]] = data
                     
                     reply = get_elements_except_key(ClientThread.rooms[self.player[2]], data[0])

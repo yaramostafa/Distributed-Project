@@ -1,10 +1,5 @@
-import random
+import random, pygame, pickle, socket, ClientFunctions as CF
 from time import sleep
-import pygame
-import pickle
-import socket, threading
-from cargame import *
-import ClientFunctions as CF
 
 HOST = 'localhost'
 PORT = 10000
@@ -112,6 +107,7 @@ class CarRacing:
         self.waitingForPlayers()
         pygame.display.set_caption('Car Dodge')
         self.run_car()
+        
 
     def run_car(self):
         win = -1
@@ -159,15 +155,12 @@ class CarRacing:
             self.highscore(self.player[6])
             win = self.leaderboard()
             if win != -1:
-                self.display_winner(win)
+                self.display_winner(self.player[1])
                 break
             self.player[6] += 1
             if (self.player[6] % 100 == 0):
                 self.enemy_car_speed += 1
                 self.bg_speed += 1
-                if(self.player[6]%500 == 0):
-                    print(self.client.send(2))
-                # call db query
                 print("Milestone Reached!")
             if self.player[5] < self.enemy_car_starty + self.enemy_car_height:
                 if self.player[5] > self.enemy_car_startx and self.player[4] < self.enemy_car_startx + self.enemy_car_width or self.player[4] + 49 > self.enemy_car_startx and self.player[4] + 49 < self.enemy_car_startx + self.enemy_car_width:
@@ -278,7 +271,7 @@ class CarRacing:
             text = font.render(msg, True, self.white)
             self.gameDisplay.blit(text, (1055, i))
             i+=20
-        if all_scores_sorted[0] >= 20000:
+        if all_scores_sorted[0] >= 1000:
             return str(all_scores_sorted[0])
         else:
             return -1

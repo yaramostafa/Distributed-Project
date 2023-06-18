@@ -75,6 +75,7 @@ def loginToGame(csocket):
                     finalizePlayer(room[0], account)
                     print(receive(csocket))
             else:
+                updatePlayer(account, 0)
                 send(csocket, 3)
             break
     cur.execute("SELECT * FROM player WHERE username= '"
@@ -111,7 +112,8 @@ def createRoom(csocket, account):
             
 def finalizePlayer(rID, account):
     cur.execute("UPDATE player SET rID = '"
-                +str(rID)+"' WHERE pID = '"
+                +str(rID)+"', dc = '0' "+
+                " WHERE pID = '"
                 +str(account[0])+"'")
     db.commit()
     cur.execute(
@@ -143,9 +145,14 @@ def getCountPlayers(rID):
                 " rID = '"+str(rID)+"'")
     return cur.fetchone()[0]
 
-def updatePlayer(player):
+def updatePlayer(player, dc):
     cur.execute("UPDATE player SET xCoord = '"+str(player[4])+"',"+
                 " yCoord = '"+str(player[5])+"', score = '"+str(player[6])+"',"+
-                " dc = '"+str(player[7])+"' WHERE pID = '"+str(player[0])+"'")
+                " dc = '"+str(dc)+"' WHERE pID = '"+str(player[0])+"'")
+    db.commit()
+    
+def deleteRoom(rID):
+    cur.execute("DELETE FROM player WHERE rID = '"+str(rID)+"'")
+    cur.execute("DELETE FROM room WHERE rID = '"+str(rID)+"'")
     db.commit()
     
