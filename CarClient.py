@@ -1,4 +1,4 @@
-import random, pygame, pickle, socket, ClientFunctions as CF
+import random, pygame, pickle, socket, threading, ChatClient as CC, ClientFunctions as CF
 from time import sleep
 
 HOST = 'localhost'
@@ -19,10 +19,13 @@ class ClientSocket:
             else: break
         print(chooseLogin)
         self.csocket.send(pickle.dumps(chooseLogin))
+        cName = ""
         if chooseLogin==2:
-            CF.cLogin(self.csocket)
+            cName = CF.cLogin(self.csocket)
         elif chooseLogin==1:
-            CF.cSignup(self.csocket)
+            cName = CF.cSignup(self.csocket)+ "'s Chat"
+        t1 = threading.Thread(target=CC.initChat, args=(cName, ))
+        t1.start()
         
         self.player = pickle.loads(self.csocket.recv(MSGSIZE))
         

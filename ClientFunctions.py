@@ -34,6 +34,8 @@ def cLogin(csocket):
         ack = receive(csocket)
         if ack[0]==-1:
             print("Error! Enter Correct data\n\n")
+            
+    return username
     
 def cSignup(csocket):
     ack = [-1]
@@ -43,4 +45,5 @@ def cSignup(csocket):
         ack = receive(csocket)
         if ack[0]==-1:
             print("Error! Enter another username ")
-    cLogin(csocket)
+    return cLogin(csocket)
+    
