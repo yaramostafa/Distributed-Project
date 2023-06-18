@@ -3,7 +3,7 @@ from time import sleep
 
 PORT = 10000
 MSGSIZE = 2048
-HOST = 'localhost'
+HOST = '0.0.0.0'
 
 def get_elements_except_key(dict, key):
     x = dict.copy()

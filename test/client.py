@@ -3,7 +3,7 @@ import MySQLdb
 
 def main():
     # Connect to the database
-    db = MySQLdb.connect(host="terraform-20230616200457941200000001.csh8tbkzf6ga.us-east-1.rds.amazonaws.com",
+    db = MySQLdb.connect(host="terraform-20230617133013078000000001.csh8tbkzf6ga.us-east-1.rds.amazonaws.com",
         user="root",
         password="G3F3yeUwkCE#EfJ",
         database="mydb")

@@ -9,6 +9,7 @@ resource "aws_elb" "cars-dev-loadbalancer" {
         "${aws_subnet.cars-dev-subnet2.id}",
         "${aws_subnet.cars-dev-subnet3.id}"
     ]
+
     cross_zone_load_balancing = true
 health_check {
     healthy_threshold = 2

@@ -6,6 +6,7 @@ resource "aws_route_table" "cars-dev-routetable" {
     gateway_id = "${aws_internet_gateway.cars-dev-gateway.id}"
   }
 
+
   tags={
     environment="dev"
   }

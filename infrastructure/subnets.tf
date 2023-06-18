@@ -8,6 +8,7 @@ tags={
     environment="dev"
 }
 
+
 }
 
 resource "aws_subnet" "cars-dev-subnet2" {
@@ -20,6 +21,7 @@ tags={
     environment="dev"
 }
 
+
 }
 
 resource "aws_subnet" "cars-dev-subnet3" {
@@ -31,5 +33,6 @@ resource "aws_subnet" "cars-dev-subnet3" {
 tags={
     environment="dev"
 }
+
 
 }

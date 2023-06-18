@@ -30,5 +30,6 @@ resource "aws_autoscaling_group" "cars-dev-scalinggroup" {
     value ="dev"
     propagate_at_launch = true
   }
+
   
 }

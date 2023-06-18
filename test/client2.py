@@ -1,6 +1,6 @@
 import socket
 
-HOST = "cars-dev-loadbalancer-1443288882.us-east-1.elb.amazonaws.com"
+HOST = "cars-dev-loadbalancer-1601029225.us-east-1.elb.amazonaws.com"
 PORT = 10001
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
