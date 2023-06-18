@@ -144,8 +144,8 @@ def getCountPlayers(rID):
     return cur.fetchone()[0]
 
 def updatePlayer(player):
-    cur.execute("UPDATE player SET xCoord = '"+player[4]+"',"+
-                " yCoord = '"+player[5]+"', score = '"+player[6]+"',"+
-                " dc = '"+player[7]+"' WHERE pID = '"+player[0]+"'")
+    cur.execute("UPDATE player SET xCoord = '"+str(player[4])+"',"+
+                " yCoord = '"+str(player[5])+"', score = '"+str(player[6])+"',"+
+                " dc = '"+str(player[7])+"' WHERE pID = '"+str(player[0])+"'")
     db.commit()
     
