@@ -31,4 +31,11 @@ listener {
     instance_protocol = "tcp"
   }
 
+listener {
+   lb_port=10000
+   lb_protocol = "tcp"
+   instance_port = "10000"
+   instance_protocol = "tcp"
+}
+
 }
