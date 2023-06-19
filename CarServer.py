@@ -69,7 +69,7 @@ class ClientThread(threading.Thread):
             sleep(1)
             SU.send(self.csocket, "start")
             break
-
+        x=0
         while True:
             try:
                 rec = SU.receiveArr(self.csocket, self)
@@ -109,7 +109,9 @@ class ClientThread(threading.Thread):
                     
                     reply = get_elements_except_key(ClientThread.rooms[self.player[2]], rec[0])
                     reply = list(reply.values())
-                    
+                    x+=1
+                    if x%100==0:
+                        DB.updatePlayer(rec, 0)
                 SU.send(self.csocket, len(reply))
                 for i in reply:
                     _ = SU.receiveInt(self.csocket)

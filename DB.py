@@ -25,10 +25,10 @@ def getall(exp: str):
         return list(x)
     except:
         return [-1]
-db = MySQLdb.connect(host='terraform-20230619161011401600000001.cnjjrg5jq7bs.us-east-1.rds.amazonaws.com',  # your host, usually localhost
+db = MySQLdb.connect(host='localhost',  # your host, usually localhost
                      user='root',       # your username
-                     passwd='G3F3yeUwkCE#EfJ',         # your password
-                     db='mydb')
+                     passwd='',         # your password
+                     db='race-chat')
 
 cur = db.cursor()
 
