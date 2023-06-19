@@ -92,8 +92,6 @@ class ClientThread(threading.Thread):
                     
                     reply = get_elements_except_key(ClientThread.rooms[self.player[2]], data[0])
                     reply = list(reply.values())
-                    print("Received: ", data)
-                    print("Sending : ", reply)
 
                 self.csocket.sendall(pickle.dumps(reply))
             except:
