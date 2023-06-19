@@ -7,7 +7,7 @@ CSE354 Project 2023.pdf
 
 https://github.com/yaramostafa/Distributed-Project/blob/2196b0e50bf8e86c8234a00ca07c378f07dee596/README.txt
 
-car game and chat interface
+# Car game and Chat interface
 
 ![image](https://github.com/yaramostafa/Distributed-Project/assets/89746218/c34ae5f5-7678-4960-a447-4d1a77bd7a36)
 
