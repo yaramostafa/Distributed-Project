@@ -1,8 +1,11 @@
 # Distributed-Project
 A multi-player distributed 2D Car Racing Game along with chatting feature
 
-Documention 
+Documention:
+
 CSE354 Project 2023.pdf
+
+https://github.com/yaramostafa/Distributed-Project/blob/2196b0e50bf8e86c8234a00ca07c378f07dee596/README.txt
 
 car game and chat interface
 
