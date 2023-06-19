@@ -1,4 +1,4 @@
-import socket, threading, pickle, DB
+import socket, threading, DB, SocketUtils as SU
 from time import sleep
 
 PORT = 10000
@@ -13,14 +13,7 @@ def get_elements_except_key(dict, key):
         pass
     return x
 
-def receive(csocket, thread: threading.Thread):
-    try:
-        return pickle.loads(csocket.recv(2048))
-    except:
-        csocket.close()
-        thread.daemon = True
-        thread.dc = True
-        return [-1]
+
 
 class ClientThread(threading.Thread):
     rooms = {}
@@ -29,7 +22,7 @@ class ClientThread(threading.Thread):
         self.dc = False
         threading.Thread.__init__(self)
         self.csocket = clientsocket
-        logchoose = receive(self.csocket, self)
+        logchoose = SU.receiveInt(self.csocket, self)
         if self.dc:
             return
         print(logchoose)
@@ -59,7 +52,8 @@ class ClientThread(threading.Thread):
         if self.dc:
             return
         print("new Connection")
-        self.csocket.send(pickle.dumps(self.player))
+        SU.sendArr(self.csocket, self.player)
+        _ = SU.receiveInt(self.csocket)
         sleep(1)
         
         #sending to waiting for players
@@ -70,16 +64,16 @@ class ClientThread(threading.Thread):
             print("NUMBER OF PLAYERS", room)
             while countplayers < room:
                 countplayers = len(ClientThread.rooms[self.player[2]])
-                self.csocket.send(pickle.dumps(0))
+                
                 sleep(1)
             sleep(1)
-            self.csocket.send(pickle.dumps("start"))
+            SU.send(self.csocket, "start")
             break
 
         while True:
             try:
-                data = receive(self.csocket, self)
-                if not data:
+                rec = SU.receiveArr(self.csocket, self)
+                if not rec:
                     print("Player"+str(self.player[3])
                           +" Disconnected")
                     #self.player.disconnect = 1
@@ -97,19 +91,29 @@ class ClientThread(threading.Thread):
                     print("updated")
                     break
                 else:
-                    # if data == 2:
+                    # if rec == 2:
                     #     DB.updatePlayer(ClientThread.
                     #                     rooms[self.player[2]]
                     #                     [self.player[0]])
                     #     self.csocket.send(pickle.dumps('Updated'))
                     #     print("updated")
                     #     continue
-                    ClientThread.rooms[self.player[2]][self.player[0]] = data
+                    rec[0] = int(rec[0])
+                    rec[2] = int(rec[2])
+                    rec[3] = int(rec[3])
+                    rec[4] = int(rec[4])
+                    rec[5] = int(rec[5])
+                    rec[6] = int(rec[6])
+                    rec[7] = int(rec[7])
+                    ClientThread.rooms[self.player[2]][self.player[0]] = rec
                     
-                    reply = get_elements_except_key(ClientThread.rooms[self.player[2]], data[0])
+                    reply = get_elements_except_key(ClientThread.rooms[self.player[2]], rec[0])
                     reply = list(reply.values())
-
-                self.csocket.sendall(pickle.dumps(reply))
+                    
+                SU.send(self.csocket, len(reply))
+                for i in reply:
+                    _ = SU.receiveInt(self.csocket)
+                    SU.sendArr(self.csocket, i)
             except:
                 break
     

@@ -1,12 +1,7 @@
-import pickle
+import SocketUtils as SU
 from time import sleep
 
-
-def send(csocket, data):
-    csocket.send(pickle.dumps(data))
-
-def receive(csocket):
-    return pickle.loads(csocket.recv(2048))
+    
 
 def cLogin(csocket):
     ack = [-1]
@@ -30,8 +25,8 @@ def cLogin(csocket):
                 sleep(1)
         else:
             numplayers = -1 # dummy number
-        send(csocket, [username, roomname, numplayers])
-        ack = receive(csocket)
+        SU.sendArr(csocket, [numplayers, username, roomname])
+        ack = SU.receiveArr(csocket)
         if ack[0]==-1:
             print("Error! Enter Correct data\n\n")
             
@@ -41,8 +36,8 @@ def cSignup(csocket):
     ack = [-1]
     while ack[0]==-1:
         username = str(input('Enter a username: '))
-        send(csocket,username)
-        ack = receive(csocket)
+        SU.send(csocket,username)
+        ack = SU.receiveArr(csocket)
         if ack[0]==-1:
             print("Error! Enter another username ")
     return cLogin(csocket)

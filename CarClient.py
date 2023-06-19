@@ -1,4 +1,5 @@
-import random, pygame, pickle, socket, threading, ChatClient as CC, ClientFunctions as CF
+import random, pygame, socket, threading, ChatClient as CC, ClientFunctions as CF
+import SocketUtils as SU
 from time import sleep
 
 HOST = 'localhost'
@@ -22,30 +23,47 @@ class ClientSocket:
                 chooseLogin = int(input('Please enter a correct choice: '))
             else: break
         print(chooseLogin)
-        self.csocket.send(pickle.dumps(chooseLogin))
+        SU.send(self.csocket, chooseLogin)
         cName = ""
         if chooseLogin==2:
             cName = CF.cLogin(self.csocket)
         elif chooseLogin==1:
             cName = CF.cSignup(self.csocket)+ "'s Chat"
-        t1 = threading.Thread(target=CC.initChat, args=(cName, ))
-        t1.start()
+        # t1 = threading.Thread(target=CC.initChat, args=(cName, ))
+        # t1.start()
         
-        self.player = pickle.loads(self.csocket.recv(MSGSIZE))
+        self.player = SU.receiveArr(self.csocket)
+        self.player[0] = int(self.player[0])
+        self.player[2] = int(self.player[2])
+        self.player[3] = int(self.player[3])
+        self.player[4] = int(self.player[4])
+        self.player[5] = int(self.player[5])
+        self.player[6] = int(self.player[6])
+        self.player[7] = int(self.player[7])
+        SU.send(self.csocket, 0)
         atexit.register(exitClient, self.csocket)
         
 
     def send(self, data):
         try:
-            self.csocket.send(pickle.dumps(data))
-            return pickle.loads(self.csocket.recv(MSGSIZE))
+            SU.sendArr(self.csocket, data)
+            size = SU.receiveInt(self.csocket)
+            buf = []
+            for _ in range(size):
+                SU.send(self.csocket, 0)
+                rec = SU.receiveArr(self.csocket)
+                rec[0] = int(rec[0])
+                rec[2] = int(rec[2])
+                rec[3] = int(rec[3])
+                rec[4] = int(rec[4])
+                rec[5] = int(rec[5])
+                rec[6] = int(rec[6])
+                rec[7] = int(rec[7])
+                buf += [rec]
+            return buf
         except:
             pass
-    def closeconn(self):
-        self.csocket.send(pickle.dumps(0))
 
-    def recieve(self):
-        return pickle.loads(self.csocket.recv(MSGSIZE))
 
 
 class CarRacing:
@@ -122,7 +140,7 @@ class CarRacing:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.crashed = True
-                    self.client.closeconn()
+                    SU.send(self.client.csocket, 0)
                     pygame.quit()
                     
                 
@@ -206,7 +224,7 @@ class CarRacing:
         pygame.display.update()
         self.clock.tick(60)
         car_racing.initialize()
-        self.client.closeconn()
+        SU.send(self.client.csocket, 0)
 
     def back_ground_road(self):
         self.gameDisplay.blit(self.bgImg, (self.bg_x1, self.bg_y1))
@@ -290,7 +308,7 @@ class CarRacing:
                 pygame.quit()
                 quit()
         self.gameDisplay.fill(self.black)
-        recieved = self.client.recieve()
+        recieved = SU.receiveString(self.client.csocket)
         font = pygame.font.SysFont("lucidaconsole", 40)
         text = font.render("Waiting for players... ^.^", True, self.white)
         self.gameDisplay.blit(text, (550 - text.get_width() // 2, 240 - text.get_height() // 2))
@@ -304,7 +322,7 @@ class CarRacing:
                     quit()
 
             self.gameDisplay.fill(self.black)
-            recieved = self.client.recieve()
+            recieved = SU.receiveString(self.client.csocket)
             font = pygame.font.SysFont("lucidaconsole", 40)
             text = font.render("Waiting for players... ^.^", True, self.white)
             self.gameDisplay.blit(text, (550 - text.get_width() // 2, 240 - text.get_height() // 2))
