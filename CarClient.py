@@ -98,10 +98,13 @@ class CarRacing:
         self.gameDisplay.blit(self.carImg, (car_x_coordinate, car_y_coordinate))
 
     def drawOpp(self):
-        for opponent in self.opponents:
-            if opponent[-2] == 0:
-                op_carImg = pygame.image.load(opponent[-1])
-                self.gameDisplay.blit(op_carImg, (opponent[4], opponent[5]))
+        try:
+            for opponent in self.opponents:
+                if opponent[-2] == 0:
+                    op_carImg = pygame.image.load(opponent[-1])
+                    self.gameDisplay.blit(op_carImg, (opponent[4], opponent[5]))
+        except Exception as e:
+            print(e)
 
     def racing_window(self):
         self.gameDisplay = pygame.display.set_mode((self.display_width, self.display_height))
@@ -146,14 +149,17 @@ class CarRacing:
 
 
             self.opponents = self.client.send(self.player)
-            self.drawOpp()
             self.car(self.player[4], self.player[5])
 
             self.highscore(self.player[6])
             win = self.leaderboard()
             if win != -1:
-                self.display_winner(self.player[1])
-                break
+                if win == None:
+                    win = self.player[1]
+                self.display_winner(win)
+                self.crashed = True
+                continue
+            self.drawOpp()
             self.player[6] += 1
             if (self.player[6] % 100 == 0):
                 self.enemy_car_speed += 1
@@ -177,9 +183,12 @@ class CarRacing:
                 self.crashed = True
                 self.player[6] -= 1000
                 self.display_message("Out Of Bound -1000")
-
-            pygame.display.update()
-            self.clock.tick(60)
+            try: 
+                pygame.display.update()
+                self.clock.tick(60)
+            except:
+                pygame.quit()
+                break
 
     def display_message(self, msg):
         font = pygame.font.SysFont("comicsansms", 72, True)
@@ -200,8 +209,21 @@ class CarRacing:
         self.display_credit()
         pygame.display.update()
         self.clock.tick(60)
-        car_racing.initialize()
+        #car_racing.initialize()
         self.client.closeconn()
+        while True:
+            try:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                self.gameDisplay.blit(text, (550 - text.get_width() // 2, 240 - text.get_height() // 2))
+                self.display_credit()
+                pygame.display.update()
+                self.clock.tick(60)
+                sleep(1)
+            except:
+                pygame.quit()
+                break
 
     def back_ground_road(self):
         self.gameDisplay.blit(self.bgImg, (self.bg_x1, self.bg_y1))
@@ -268,8 +290,16 @@ class CarRacing:
             text = font.render(msg, True, self.white)
             self.gameDisplay.blit(text, (1055, i))
             i+=20
-        if all_scores_sorted[0] >= 20000:
-            return str(all_scores_sorted[0])
+        if all_scores_sorted[0] >= 1000:
+            #print("Player"+str(players[0])+" has WONN!!!!!!!!!!!!!!!!")
+            if players[0] == self.player[3]:
+                #print("====",self.player[1],"==========")
+                return self.player[1]
+            else:
+                for opponent in self.opponents:
+                    if players[0] == opponent[3]:
+                        #print("========",opponent[1],"=========")
+                        return opponent[1]
         else:
             return -1
 
@@ -313,7 +343,4 @@ if __name__ == '__main__':
 
     car_racing = CarRacing()
     car_racing.racing_window()
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+    

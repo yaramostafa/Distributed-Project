@@ -1,5 +1,9 @@
 import socket, threading
+#from socket import error as SocketError
+#import errno
 
+host = "0.0.0.0"
+port = 10001
 
 class Client:
     def __init__(self):
@@ -9,7 +13,6 @@ class Client:
         (clientsockRcv, (ipR, portR)) = serverSocket.accept()
         self.Trcv = ClientThread(ipR,portR,clientsockRcv,'rcv')
         self.Trcv.start()
-
 
 class ClientThread(threading.Thread):
     clientSocketSend = []
@@ -42,27 +45,43 @@ class ClientThread(threading.Thread):
             self.csocket.send("Welcome to the multi-threaded server".encode())
 
         else:
-            name = self.csocket.recv(2048).decode()
-            welcomeMsg = name.replace(" ", "") + " just joined the chat!"
-            print(welcomeMsg)
-            self.clientTSend[self.id].newmember(welcomeMsg)
+            try:
+                name = self.csocket.recv(2048).decode()
+                welcomeMsg = name.replace(" ", "") + " just joined the chat!"
+                print(welcomeMsg)
+                self.clientTSend[self.id].newmember(welcomeMsg)
 
-            data = "dummydata"
-            while len(data):
-                data = self.csocket.recv(2048)
-                print("Client(%s:%s) sent : %s"%(self.ip, str(self.port), data.decode()))
-                if data.decode().split(":")[1].replace(" ","") == "quit":
-                    data = ''
-                    print("QUIT")
-                else:
-                    self.sendtoall(data)
+            except Exception as e:
+                self.csocket.close()
+                print(e)
 
-            disconnectMsg = name + " disconnected from chat"
-            self.sendtoall(disconnectMsg.encode())
-            self.clientSocketSend[self.id].close()
-            ClientThread.clientSocketSend[self.id] = 0
-            self.csocket.close()
-            print("Client at ",self.ip," disconnected...")
+            else:
+                data = "dummydata"
+                while len(data):
+                    try:
+                        data = self.csocket.recv(2048)
+                        print("Client(%s:%s) sent : %s"%(self.ip, str(self.port), data.decode()))
+                        if data.decode().split(":")[1].replace(" ","") == "quit":
+                            data = ''
+                            print("QUIT")
+                        else:
+                            self.sendtoall(data)
+                    except Exception as e:
+                        disconnectMsg = name + " disconnected from chat"
+                        #self.sendtoall(disconnectMsg.encode())
+                        self.clientSocketSend[self.id].close()
+                        print(e)
+                        break
+                try:
+                    disconnectMsg = name + " disconnected from chat"
+                    self.sendtoall(disconnectMsg.encode())
+                    self.clientSocketSend[self.id].close()
+                    ClientThread.clientSocketSend[self.id] = 0
+                    self.csocket.close()
+                    print("Client at ",self.ip," disconnected...")
+                except Exception as e:
+                    print(e)
+
 
     def newmember(self,name):
         for client in ClientThread.clientSocketSend:
@@ -75,8 +94,6 @@ class ClientThread(threading.Thread):
                 client.send(data)
                 print("Sent ", data, " to ", client)
 
-host = "0.0.0.0"
-port = 10001
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
