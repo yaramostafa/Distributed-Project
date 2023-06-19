@@ -165,11 +165,15 @@ class CarRacing:
             if self.enemy_car2_starty > self.display_height:
                 self.enemy_car2_starty = 0 - self.enemy_car_height
                 self.enemy_car2_startx = random.randrange(50, 950)
+
+
+
             self.opponents = self.client.send(self.player)
             self.drawOpp()
-            win = self.leaderboard()
             self.car(self.player[4], self.player[5])
+
             self.highscore(self.player[6])
+            win = self.leaderboard()
             if win != -1:
                 self.display_winner(self.player[1])
                 break
@@ -194,6 +198,7 @@ class CarRacing:
 
             if self.player[4] < 50 or self.player[4] > 950:
                 self.crashed = True
+                self.player[6] -= 1000
                 self.display_message("Out Of Bound -1000")
 
             pygame.display.update()
