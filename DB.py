@@ -1,12 +1,16 @@
 import MySQLdb
 import pickle
-from time import sleep
 
 def send(csocket, data):
     csocket.send(pickle.dumps(data))
 
-def receive(csocket):
-    return pickle.loads(csocket.recv(2048))
+def receive(csocket, thread):
+    try:
+        return pickle.loads(csocket.recv(2048))
+    except:
+        csocket.close()
+        thread.dc = True
+        return [-1]
 
 def set(exp: str):
     try:
@@ -40,21 +44,28 @@ db = MySQLdb.connect(host='localhost',  # your host, usually localhost
 
 cur = db.cursor()
 
-def signup(csocket):
+def signup(csocket, thread):
     ack = [-1]
     while ack[0]==-1:
-        username = receive(csocket)
+        username = receive(csocket, thread)
+        if thread.dc:
+            return [-1]
         ack = set("INSERT INTO player"+
                      " (username, xCoord, yCoord) VALUES"
                      +" ('"+username+"', 0, 0)")
         ack = [ack]
         send(csocket, ack)
-    return sLogin(csocket)
+    return sLogin(csocket, thread)
     
-def loginToGame(csocket):
+def loginToGame(csocket, thread):
     #returns    account in case of success
     #           [-1]    in case of failure
-    username, roomname, numplayers = receive(csocket)
+    try:
+        username, roomname, numplayers = receive(csocket, thread)
+    except:
+        thread.dc = True
+    if thread.dc:
+        return [-1]
     account = get("SELECT * FROM player WHERE username= '"+username+"'")
     if account[0]==-1: return [-1]
     elif account[2]>0:
@@ -97,10 +108,12 @@ def loginToGame(csocket):
                   +str(account[0])+"'")
     return account
 
-def sLogin(csocket):
+def sLogin(csocket, thread):
     ack = [-1]
     while ack[0]==-1:
-        ack = list(loginToGame(csocket))
+        ack = list(loginToGame(csocket, thread))
+        if thread.dc:
+            return
         send(csocket, ack)
     return ack
 

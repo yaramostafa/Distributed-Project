@@ -4,7 +4,11 @@ from time import sleep
 HOST = 'localhost'
 PORT = 10000
 MSGSIZE = 2048
+import atexit
 
+def exitClient(csocket):
+    csocket.closeconn()
+    print("exiting now, goodbye")
 
 class ClientSocket:
     def __init__(self):
@@ -28,6 +32,7 @@ class ClientSocket:
         t1.start()
         
         self.player = pickle.loads(self.csocket.recv(MSGSIZE))
+        atexit.register(exitClient, self.csocket)
         
 
     def send(self, data):

@@ -13,18 +13,32 @@ def get_elements_except_key(dict, key):
         pass
     return x
 
+def receive(csocket, thread: threading.Thread):
+    try:
+        return pickle.loads(csocket.recv(2048))
+    except:
+        csocket.close()
+        thread.daemon = True
+        thread.dc = True
+        return [-1]
+
 class ClientThread(threading.Thread):
     rooms = {}
     
     def __init__(self, clientsocket):
+        self.dc = False
         threading.Thread.__init__(self)
         self.csocket = clientsocket
-        logchoose = pickle.loads(self.csocket.recv(MSGSIZE))
+        logchoose = receive(self.csocket, self)
+        if self.dc:
+            return
         print(logchoose)
         if(logchoose==2):
-            self.player = DB.sLogin(self.csocket)
+            self.player = DB.sLogin(self.csocket, self)
         elif(logchoose==1):
-            self.player = DB.signup(self.csocket)
+            self.player = DB.signup(self.csocket, self)
+        if self.dc:
+            return
         print("user: '"+ str(self.player[0])+"' Started")
         
         try:
@@ -42,6 +56,8 @@ class ClientThread(threading.Thread):
         print("[+] New thread started")
 
     def run(self):
+        if self.dc:
+            return
         print("new Connection")
         self.csocket.send(pickle.dumps(self.player))
         sleep(1)
@@ -62,7 +78,7 @@ class ClientThread(threading.Thread):
 
         while True:
             try:
-                data = pickle.loads(self.csocket.recv(2048))
+                data = receive(self.csocket, self)
                 if not data:
                     print("Player"+str(self.player[3])
                           +" Disconnected")
@@ -96,6 +112,7 @@ class ClientThread(threading.Thread):
                 self.csocket.sendall(pickle.dumps(reply))
             except:
                 break
+    
 
 
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
